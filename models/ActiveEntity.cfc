@@ -45,7 +45,7 @@ component
 		this.criteria( {} );
 		this.set_sort( {} );
 		// Valid operators for where() clauses
-		this.set_operators( [ "=", "!=", ">=", "<=", "<>", "like" ] );
+		this.set_operators( [ "=", "!=", ">=", "<=", "<>", "in" "like" ] );
 
 		return super.init();
 	}
@@ -174,7 +174,7 @@ component
 		} else {
 			if ( key == "_id" ) ARGUMENTS.value = getMongoUtil().newObjectIdFromId( ARGUMENTS.value );
 			var criteria = this.get_criteria();
-			switch ( ARGUMENTS.operator ) {
+			switch ( lcase( ARGUMENTS.operator ) ) {
 				case "!=":
 				case "<>":
 					VARIABLES._criteria[ ARGUMENTS.key ] = { "$ne" : ARGUMENTS.value };
@@ -190,6 +190,9 @@ component
 					break;
 				case "<=":
 					VARIABLES._criteria[ ARGUMENTS.key ] = { "$lte" : ARGUMENTS.value };
+					break;
+				case "in":
+					VARIABLES._criteria[ARGUMENTS.key]={"$in"=ARGUMENTS.value};
 					break;
 				default:
 					VARIABLES._criteria[ ARGUMENTS.key ] = ARGUMENTS.value;
