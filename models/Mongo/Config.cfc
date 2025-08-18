@@ -79,7 +79,9 @@ component
 	}
 
 	public function addServer( serverName, serverPort ){
-		var sa = jLoader.create( "com.mongodb.ServerAddress" ).init( serverName, javacast( "integer", serverPort ) );
+		var sa = jLoader
+			.create( "com.mongodb.ServerAddress" )
+			.init( serverName, javacast( "integer", serverPort ) );
 		variables.conf.servers.add( sa );
 
 		return this;
@@ -126,7 +128,10 @@ component
 		// Set our server selection timeout to our connect timeout if it's not specified - this prevents auth failures from taking 30000ms to return the error
 		if ( !structKeyExists( mongoClientOptions, "serverSelectionTimeout" ) ) {
 			builder.serverSelectionTimeout(
-				structKeyExists( mongoClientOptions, "connectTimeout" ) ? javacast( "integer", mongoClientOptions.connectTimeout ) : 3000
+				structKeyExists( mongoClientOptions, "connectTimeout" ) ? javacast(
+					"integer",
+					mongoClientOptions.connectTimeout
+				) : 3000
 			);
 		}
 

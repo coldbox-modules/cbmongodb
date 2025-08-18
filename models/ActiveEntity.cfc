@@ -174,7 +174,7 @@ component
 		} else {
 			if ( key == "_id" ) ARGUMENTS.value = getMongoUtil().newObjectIdFromId( ARGUMENTS.value );
 			var criteria = this.get_criteria();
-			switch ( lcase( ARGUMENTS.operator ) ) {
+			switch ( lCase( ARGUMENTS.operator ) ) {
 				case "!=":
 				case "<>":
 					VARIABLES._criteria[ ARGUMENTS.key ] = { "$ne" : ARGUMENTS.value };
@@ -192,7 +192,7 @@ component
 					VARIABLES._criteria[ ARGUMENTS.key ] = { "$lte" : ARGUMENTS.value };
 					break;
 				case "in":
-					VARIABLES._criteria[ARGUMENTS.key]={"$in"=ARGUMENTS.value};
+					VARIABLES._criteria[ ARGUMENTS.key ] = { "$in" : ARGUMENTS.value };
 					break;
 				default:
 					VARIABLES._criteria[ ARGUMENTS.key ] = ARGUMENTS.value;
