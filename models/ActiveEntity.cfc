@@ -45,7 +45,7 @@ component
 		this.criteria( {} );
 		this.set_sort( {} );
 		// Valid operators for where() clauses
-		this.set_operators( [ "=", "!=", ">=", "<=", "<>", "in" "like" ] );
+		this.set_operators( [ "=", "!=", ">=", "<=", "<>", "in", "like" ] );
 
 		return super.init();
 	}
