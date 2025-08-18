@@ -81,7 +81,7 @@ component
 	public function addServer( serverName, serverPort ){
 		var sa = jLoader
 			.create( "com.mongodb.ServerAddress" )
-			.init( serverName, javacast( "integer", serverPort ) );
+			.init( serverName, javacast( "int", serverPort ) );
 		variables.conf.servers.add( sa );
 
 		return this;
@@ -113,7 +113,7 @@ component
 						builder.writeConcern( wc );
 						break;
 					case "connectTimeout":
-						builder.connectTimeout( javacast( "integer", arg ) );
+						builder.connectTimeout( javacast( "int", arg ) );
 						break;
 					default:
 						evaluate( "builder.#key#( arg )" );
@@ -129,7 +129,7 @@ component
 		if ( !structKeyExists( mongoClientOptions, "serverSelectionTimeout" ) ) {
 			builder.serverSelectionTimeout(
 				structKeyExists( mongoClientOptions, "connectTimeout" ) ? javacast(
-					"integer",
+					"int",
 					mongoClientOptions.connectTimeout
 				) : 3000
 			);
