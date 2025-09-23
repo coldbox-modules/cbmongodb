@@ -1,7 +1,7 @@
 /*******************************************************************************
  *	Unit Tests for cbmongodb.models.Mongo.Indexer
  *******************************************************************************/
-component name="TestMongoUtil" extends="tests.specs.CBMongoDBBaseTest" {
+component extends="tests.specs.CBMongoDBBaseTest" {
 
 	function run( testResults, testBox ){
 		describe( "Tests Core Indexing Methods", function(){

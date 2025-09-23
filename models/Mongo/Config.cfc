@@ -79,9 +79,7 @@ component
 	}
 
 	public function addServer( serverName, serverPort ){
-		var sa = jLoader
-			.create( "com.mongodb.ServerAddress" )
-			.init( serverName, javacast( "integer", serverPort ) );
+		var sa = jLoader.create( "com.mongodb.ServerAddress" ).init( serverName, javacast( "int", serverPort ) );
 		variables.conf.servers.add( sa );
 
 		return this;

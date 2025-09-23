@@ -606,7 +606,6 @@ component
 			get_default_document(),
 			false
 		);
-
 		// ensure the entity _id is always cast as a string
 		if ( structKeyExists( record, "_id" ) && getMongoUtil().isObjectId( record[ "_id" ] ) ) {
 			record[ "_id" ] = record[ "_id" ].toString();

@@ -9,7 +9,7 @@
  * @author      Jon Clausen <jon_clausen@silowebworks.com>
  * @license     Apache v2.0 <http: // www.apache.org / licenses/>
  */
-component name="MongoCollection" accessors="true" {
+component accessors="true" {
 
 	/**
 	 * Mongo Utils
@@ -73,7 +73,9 @@ component name="MongoCollection" accessors="true" {
 	 * @param struct [criteria]	A criteria struct which restricts the counted document
 	 */
 	public function count( criteria = {} ){
-		return getDBCollection().countDocuments( getMongoUtil().toMongo( arguments.criteria ) );
+		var mongoCriteria = getMongoUtil().toMongo( arguments.criteria );
+		var collection    = getDBCollection();
+		return collection.countDocuments( mongoCriteria );
 	}
 
 	/**

@@ -38,7 +38,7 @@ component extends="cbmongodb.models.ActiveEntity" {
 		if ( len( arguments.SortOrder ) ) {
 			var sort = listToArray( arguments.sortOrder, " " );
 
-			this.setSort( { sort[1]              : sort[ 2 ] } );
+			this.setSort( { sort[1]                : sort[ 2 ] } );
 		}
 
 		return this.query();

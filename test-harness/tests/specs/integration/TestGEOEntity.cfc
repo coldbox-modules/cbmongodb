@@ -1,11 +1,7 @@
 /*******************************************************************************
  *	Integration Test for /cfmongodb/models/GEOEntity.cfc
  *******************************************************************************/
-component
-	name     ="TestModelGEOEntity"
-	extends  ="tests.specs.CBMongoDBBaseTest"
-	accessors=true
-{
+component extends="tests.specs.CBMongoDBBaseTest" accessors=true {
 
 	function beforeAll(){
 		// custom methods
@@ -42,7 +38,6 @@ component
 				}
 
 				expect( arrayLen( Counties.reset().findAll() ) ).toBe( 4 );
-
 
 				describe( "performs our geospatial comparison tests", function(){
 					it( "tests within() comparisons", function(){

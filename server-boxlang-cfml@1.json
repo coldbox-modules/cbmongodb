@@ -27,6 +27,6 @@
     },
     "env":{},
     "scripts":{
-        "onServerInitialInstall":"install bx-compat-cfml,bx-esapi --noSave"
+        "onServerInitialInstall":"install bx-compat-cfml,bx-esapi,bx-image,bx-unsafe-evaluate --noSave"
     }
 }

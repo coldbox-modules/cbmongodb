@@ -8,7 +8,7 @@
  * @author  Jon Clausen <jon_clausen@silowebworks.com>
  * @license Apache v2.0 <http: // www.apache.org / licenses/>
  */
-component name="GridFS" accessors="true" {
+component accessors="true" {
 
 	/**
 	 * The Mongo Client Instance
