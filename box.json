@@ -36,10 +36,10 @@
     ],
     "dependencies":{
         "cbjavaloader":"stable",
-        "mongodb-legacy-driver":"jar:https://search.maven.org/remotecontent?filepath=org/mongodb/mongodb-driver-legacy/4.9.1/mongodb-driver-legacy-4.9.1.jar",
-        "mongodb-bson":"jar:https://search.maven.org/remotecontent?filepath=org/mongodb/bson/4.9.1/bson-4.9.1.jar",
-        "mongodb-driver-core":"jar:https://search.maven.org/remotecontent?filepath=org/mongodb/mongodb-driver-core/4.9.1/mongodb-driver-core-4.9.1.jar",
-        "mongodb-driver-sync":"jar:https://search.maven.org/remotecontent?filepath=org/mongodb/mongodb-driver-sync/4.9.1/mongodb-driver-sync-4.9.1.jar",
+        "mongodb-legacy-driver":"jar:https://search.maven.org/remotecontent?filepath=org/mongodb/mongodb-driver-legacy/5.5.1/mongodb-driver-legacy-5.5.1.jar",
+        "mongodb-bson":"jar:https://search.maven.org/remotecontent?filepath=org/mongodb/bson/5.5.1/bson-5.5.1.jar",
+        "mongodb-driver-core":"jar:https://search.maven.org/remotecontent?filepath=org/mongodb/mongodb-driver-core/5.5.1/mongodb-driver-core-5.5.1.jar",
+        "mongodb-driver-sync":"jar:https://search.maven.org/remotecontent?filepath=org/mongodb/mongodb-driver-sync/5.5.1/mongodb-driver-sync-5.5.1.jar",
         "javaxt-core":"jar:https://www.javaxt.com/maven/javaxt/javaxt-core/1.7.8/javaxt-core-1.7.8.jar"
     },
     "installPaths":{

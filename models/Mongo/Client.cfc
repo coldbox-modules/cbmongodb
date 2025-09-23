@@ -51,8 +51,8 @@ component name="MongoClient" accessors="true" {
 	public function onDIComplete(){
 		// this.setMongoConfig(getMongoConfig());
 
-		// The Mongo driver client
-		variables.Mongo = jLoader.create( "com.mongodb.MongoClient" );
+		// The Mongo driver client (using modern MongoClients factory)
+		variables.MongoClients = jLoader.create( "com.mongodb.client.MongoClients" );
 
 		// @TODO: The async client
 		// variables.MongoAsync = jLoader.create('com.mongodb.async.client.MongoClient');
@@ -82,46 +82,28 @@ component name="MongoClient" accessors="true" {
 		if ( structKeyExists( variables.databases, arguments.dbName ) )
 			return variables.databases[ arguments.dbName ];
 
-		// New database connections
-		var MongoDb = variables.mongo;
+		// Create MongoDB client using modern API
+		var mongoClient = "";
 
 		if (
 			structKeyExists( MongoConfigSettings, "connectionString" ) && len(
 				MongoConfigSettings.connectionString
 			)
 		) {
-			var MongoClientURI = jLoader
-				.create( "com.mongodb.MongoClientURI" )
-				.init( MongoConfigSettings.connectionString );
-			MongoDb.init( MongoClientURI );
-		} else if (
-			structKeyExists( MongoConfigSettings, "auth" ) && len( MongoConfigSettings.auth.username ) && len(
-				MongoConfigSettings.auth.password
-			)
-		) {
-			var MongoCredentials = jLoader.create( "java.util.ArrayList" );
-			var MongoServers     = jLoader.create( "java.util.ArrayList" );
-
-			for ( var mongoServer in MongoConfigSettings.servers ) {
-				MongoCredentials.add(
-					createCredential(
-						MongoConfigSettings.auth.username,
-						MongoConfigSettings.auth.password,
-						structKeyExists( MongoConfigSettings.auth, "db" ) ? MongoConfigSettings.auth.db : "admin"
-					)
-				);
-			}
-
-			MongoDb.init(
-				MongoConfig.getServers(),
-				MongoCredentials,
-				getMongoConfig().getMongoClientOptions()
-			);
+			// Use connection string directly with MongoClients.create()
+			mongoClient = variables.MongoClients.create( MongoConfigSettings.connectionString );
 		} else {
-			MongoDb.init( variables.mongoConfig.getServers(), getMongoConfig().getMongoClientOptions() );
+			// Build client settings using the modern MongoClientSettings
+			var clientSettings = getMongoConfig().getMongoClientSettings();
+			mongoClient = variables.MongoClients.create( clientSettings );
 		}
 
-		var connection                          = MongoDb.getDatabase( arguments.dbName );
+		// Store the client for reuse
+		if ( !structKeyExists( variables, "mongoClient" ) ) {
+			variables.mongoClient = mongoClient;
+		}
+
+		var connection                          = mongoClient.getDatabase( arguments.dbName );
 		variables.databases[ arguments.dbName ] = connection;
 
 		return connection;
@@ -225,17 +207,17 @@ component name="MongoClient" accessors="true" {
 	}
 
 	/**
-	 * Get the underlying Java driver's Mongo object
+	 * Get the underlying Java driver's MongoClient object
 	 */
 	function getMongo(){
-		return variables.mongo;
+		return variables.mongoClient;
 	}
 
 	/**
-	 * Get the underlying Java driver's DB object
+	 * Get the underlying Java driver's MongoDatabase object
 	 */
 	function getMongoDB( mongoConfig = "" ){
-		return getMongo().getDb( getMongoConfig().getDefaults().dbName );
+		return variables.mongoClient.getDatabase( getMongoConfig().getDefaults().dbName );
 	}
 
 }

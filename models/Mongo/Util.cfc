@@ -104,7 +104,17 @@ component name="MongoUtil" accessors="true" {
 	}
 
 	/**
+	 * Convenience for creating a new criteria object based on a string _id using modern Document
+	 */
+	function newIDCriteriaDocument( String id ){
+		var doc = newDocument();
+		doc.put( "_id", newObjectIDFromID( arguments.id ) );
+		return doc;
+	}
+
+	/**
 	 * Convenience for creating a new criteria object based on a string _id
+	 * @deprecated Use newIDCriteriaDocument() instead for new code
 	 */
 	function newIDCriteriaObject( String id ){
 		var dbo = newDBObject();
@@ -145,7 +155,15 @@ component name="MongoUtil" accessors="true" {
 
 
 	/**
+	 * Create a new instance of the Document. This is the modern way to create MongoDB documents.
+	 */
+	function newDocument(){
+		return jLoader.create( "org.bson.Document" );
+	}
+
+	/**
 	 * Create a new instance of the CFBasicDBObject. You use these anywhere the Mongo Java driver takes a DBObject
+	 * @deprecated Use newDocument() instead for new code
 	 */
 	function newDBObject(){
 		return jLoader.create( "com.mongodb.BasicDBObject" );

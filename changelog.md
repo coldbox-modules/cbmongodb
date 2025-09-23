@@ -11,8 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* Updates MongoDb Driver to v4.9.1
+* Updates MongoDb Driver to v5.5.1
 * MongoDB v7/8 compatibility
+* Replace deprecated MongoDB Java Driver classes with modern equivalents
 * Drop support for Adobe < 2023
 * Drop support for Lucee < 5
 

@@ -69,8 +69,8 @@ component
 			addServer( item.serverName, item.serverPort );
 		}
 
-		// turn the struct of MongoClientOptions into a proper object
-		buildMongoClientOptions( mongoClientOptions );
+		// turn the struct of MongoClientOptions into a proper MongoClientSettings object
+		buildMongoClientSettings( mongoClientOptions );
 
 		// main entry point for environment-aware configuration; subclasses should do their work in here
 		environment = configureEnvironment();
@@ -93,8 +93,25 @@ component
 		return this;
 	}
 
-	function buildMongoClientOptions( struct mongoClientOptions ){
-		var builder = jLoader.create( "com.mongodb.MongoClientOptions$Builder" );
+	function buildMongoClientSettings( struct mongoClientOptions ){
+		var builder = jLoader.create( "com.mongodb.MongoClientSettings$Builder" );
+
+		// Add authentication if provided
+		if ( structKeyExists( variables.conf, "auth" ) && len( variables.conf.auth.username ) && len( variables.conf.auth.password ) ) {
+			var credential = jLoader.create( "com.mongodb.MongoCredential" ).createCredential(
+				javacast( "string", variables.conf.auth.username ),
+				javacast( "string", structKeyExists( variables.conf.auth, "db" ) ? variables.conf.auth.db : "admin" ),
+				variables.conf.auth.password.toCharArray()
+			);
+			builder.credential( credential );
+		}
+
+		// Add cluster settings (server addresses)
+		if ( structKeyExists( variables.conf, "servers" ) && arrayLen( variables.conf.servers ) ) {
+			var clusterSettingsBuilder = jLoader.create( "com.mongodb.connection.ClusterSettings$Builder" );
+			clusterSettingsBuilder.hosts( variables.conf.servers );
+			builder.applyToClusterSettings( clusterSettingsBuilder.build() );
+		}
 
 		for ( var key in mongoClientOptions ) {
 			var arg = mongoClientOptions[ key ];
@@ -113,31 +130,41 @@ component
 						builder.writeConcern( wc );
 						break;
 					case "connectTimeout":
-						builder.connectTimeout( javacast( "integer", arg ) );
+						var socketSettingsBuilder = jLoader.create( "com.mongodb.connection.SocketSettings$Builder" );
+						socketSettingsBuilder.connectTimeout( javacast( "integer", arg ), jLoader.create( "java.util.concurrent.TimeUnit" ).MILLISECONDS );
+						builder.applyToSocketSettings( socketSettingsBuilder.build() );
+						break;
+					case "serverSelectionTimeout":
+						var clusterSettingsBuilder = jLoader.create( "com.mongodb.connection.ClusterSettings$Builder" );
+						clusterSettingsBuilder.serverSelectionTimeout( javacast( "integer", arg ), jLoader.create( "java.util.concurrent.TimeUnit" ).MILLISECONDS );
+						builder.applyToClusterSettings( clusterSettingsBuilder.build() );
 						break;
 					default:
-						evaluate( "builder.#key#( arg )" );
+						// Skip unknown options for compatibility
+						break;
 				}
 			} catch ( any e ) {
 				throw(
-					message = "The Mongo Client option #key# could not be found.  Please verify your clientOptions settings contain only valid MongoClientOptions settings: http://api.mongodb.org/java/current/com/mongodb/MongoClientOptions.Builder.html"
+					message = "The Mongo Client option #key# could not be configured.  Please verify your clientOptions settings contain only valid MongoClientSettings options."
 				);
 			}
 		}
 
-		// Set our server selection timeout to our connect timeout if it's not specified - this prevents auth failures from taking 30000ms to return the error
+		// Set default server selection timeout if not specified
 		if ( !structKeyExists( mongoClientOptions, "serverSelectionTimeout" ) ) {
-			builder.serverSelectionTimeout(
-				structKeyExists( mongoClientOptions, "connectTimeout" ) ? javacast(
-					"integer",
-					mongoClientOptions.connectTimeout
-				) : 3000
-			);
+			var timeoutMs = structKeyExists( mongoClientOptions, "connectTimeout" ) ? javacast(
+				"integer",
+				mongoClientOptions.connectTimeout
+			) : 3000;
+			
+			var clusterSettingsBuilder = jLoader.create( "com.mongodb.connection.ClusterSettings$Builder" );
+			clusterSettingsBuilder.serverSelectionTimeout( timeoutMs, jLoader.create( "java.util.concurrent.TimeUnit" ).MILLISECONDS );
+			builder.applyToClusterSettings( clusterSettingsBuilder.build() );
 		}
 
-		variables.conf.MongoClientOptions = builder.build();
+		variables.conf.MongoClientSettings = builder.build();
 
-		return variables.conf.MongoClientOptions;
+		return variables.conf.MongoClientSettings;
 	}
 
 	private function readPreference( required string preference ){
@@ -193,10 +220,17 @@ component
 	}
 
 	public function getMongoClientOptions(){
-		if ( not structKeyExists( getDefaults(), "mongoClientOptions" ) ) {
-			buildMongoClientOptions( {} );
+		if ( not structKeyExists( getDefaults(), "mongoClientSettings" ) ) {
+			buildMongoClientSettings( {} );
 		}
-		return getDefaults().mongoClientOptions;
+		return getDefaults().mongoClientSettings;
+	}
+
+	public function getMongoClientSettings(){
+		if ( not structKeyExists( getDefaults(), "mongoClientSettings" ) ) {
+			buildMongoClientSettings( {} );
+		}
+		return getDefaults().mongoClientSettings;
 	}
 
 	public struct function getDefaults(){
