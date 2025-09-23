@@ -165,7 +165,7 @@ component accessors="true" {
 		var adminDb = variables.mongoClient.getDatabase( "admin" );
 		
 		// Create a basic user document - this is a simplified implementation
-		var userDoc = jLoader.create( "org.bson.Document" );
+		var userDoc = jLoader.create( "org.bson.Document" ).init();
 		userDoc.put( "user", arguments.username );
 		userDoc.put( "pwd", arguments.password );
 		userDoc.put( "roles", jLoader.create( "java.util.ArrayList" ).init( [ "readWrite" ] ) );

@@ -79,7 +79,7 @@ component
 	}
 
 	public function addServer( serverName, serverPort ){
-		var sa = jLoader.create( "com.mongodb.ServerAddress" ).init( serverName, javacast( "int", serverPort ) );
+		var sa = jLoader.create( "com.mongodb.ServerAddress" ).init( serverName, javacast( "integer", serverPort ) );
 		variables.conf.servers.add( sa );
 
 		return this;
@@ -92,7 +92,7 @@ component
 	}
 
 	function buildMongoClientSettings( struct mongoClientOptions ){
-		var builder = jLoader.create( "com.mongodb.MongoClientSettings$Builder" );
+		var builder = jLoader.create( "com.mongodb.MongoClientSettings" ).builder();
 
 		// Add authentication if provided
 		if ( structKeyExists( variables.conf, "auth" ) && len( variables.conf.auth.username ) && len( variables.conf.auth.password ) ) {
@@ -106,7 +106,7 @@ component
 
 		// Add cluster settings (server addresses)
 		if ( structKeyExists( variables.conf, "servers" ) && arrayLen( variables.conf.servers ) ) {
-			var clusterSettingsBuilder = jLoader.create( "com.mongodb.connection.ClusterSettings$Builder" );
+			var clusterSettingsBuilder = jLoader.create( "com.mongodb.connection.ClusterSettings" ).builder();
 			clusterSettingsBuilder.hosts( variables.conf.servers );
 			builder.applyToClusterSettings( clusterSettingsBuilder.build() );
 		}
@@ -128,12 +128,12 @@ component
 						builder.writeConcern( wc );
 						break;
 					case "connectTimeout":
-						var socketSettingsBuilder = jLoader.create( "com.mongodb.connection.SocketSettings$Builder" );
+						var socketSettingsBuilder = jLoader.create( "com.mongodb.connection.SocketSettings" ).builder();
 						socketSettingsBuilder.connectTimeout( javacast( "integer", arg ), jLoader.create( "java.util.concurrent.TimeUnit" ).MILLISECONDS );
 						builder.applyToSocketSettings( socketSettingsBuilder.build() );
 						break;
 					case "serverSelectionTimeout":
-						var clusterSettingsBuilder = jLoader.create( "com.mongodb.connection.ClusterSettings$Builder" );
+						var clusterSettingsBuilder = jLoader.create( "com.mongodb.connection.ClusterSettings" ).builder();
 						clusterSettingsBuilder.serverSelectionTimeout( javacast( "integer", arg ), jLoader.create( "java.util.concurrent.TimeUnit" ).MILLISECONDS );
 						builder.applyToClusterSettings( clusterSettingsBuilder.build() );
 						break;
@@ -155,7 +155,7 @@ component
 				mongoClientOptions.connectTimeout
 			) : 3000;
 			
-			var clusterSettingsBuilder = jLoader.create( "com.mongodb.connection.ClusterSettings$Builder" );
+			var clusterSettingsBuilder = jLoader.create( "com.mongodb.connection.ClusterSettings" ).builder();
 			clusterSettingsBuilder.serverSelectionTimeout( timeoutMs, jLoader.create( "java.util.concurrent.TimeUnit" ).MILLISECONDS );
 			builder.applyToClusterSettings( clusterSettingsBuilder.build() );
 		}

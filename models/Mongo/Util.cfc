@@ -30,7 +30,7 @@ component accessors="true" {
 			return obj;
 		}
 		if ( isArray( arguments.obj ) ) {
-			var list = jLoader.create( "java.util.ArrayList" );
+			var list = jLoader.create( "java.util.ArrayList" ).init();
 
 			for ( var member in arguments.obj ) {
 				list.add( toMongo( member ) );
@@ -158,7 +158,7 @@ component accessors="true" {
 	 * Create a new instance of the Document. This is the modern way to create MongoDB documents.
 	 */
 	function newDocument(){
-		return jLoader.create( "org.bson.Document" );
+		return jLoader.create( "org.bson.Document" ).init();
 	}
 
 	/**
@@ -260,7 +260,7 @@ component accessors="true" {
 	 * Indexing Utilities
 	 */
 	function createIndexOptions( options ){
-		var idxOptions = jLoader.create( "com.mongodb.client.model.IndexOptions" );
+		var idxOptions = jLoader.create( "com.mongodb.client.model.IndexOptions" ).init();
 
 		if ( structKeyExists( options, "name" ) ) idxOptions.name( options.name );
 		if ( structKeyExists( options, "sparse" ) ) idxOptions.sparse( options.sparse );
