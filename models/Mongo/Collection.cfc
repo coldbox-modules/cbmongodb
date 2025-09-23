@@ -74,7 +74,7 @@ component accessors="true" {
 	 */
 	public function count( criteria = {} ){
 		var mongoCriteria = getMongoUtil().toMongo( arguments.criteria );
-		var collection = getDBCollection();
+		var collection    = getDBCollection();
 		return collection.countDocuments( mongoCriteria );
 	}
 

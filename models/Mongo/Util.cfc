@@ -45,9 +45,7 @@ component accessors="true" {
 	function toMongoDocument( data ){
 		var doc = jLoader.create( "org.bson.Document" ).init();
 
-		data.keyArray().each(
-			( key, value ) => doc.put( key, value )
-		);
+		data.keyArray().each( ( key, value ) => doc.put( key, value ) );
 
 		if ( !structIsEmpty( data ) ) {
 			ensureTyping( doc );

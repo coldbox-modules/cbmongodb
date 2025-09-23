@@ -22,7 +22,6 @@ component extends="tests.specs.CBMongoDBBaseTest" {
 	}
 
 	function run( testResults, testBox ){
-
 		describe( "Tests modifications to entity scopes", function(){
 			it( "Tests custom accessor availability and accuracy", function(){
 				var testData = variables.people.getTestDocument();
@@ -98,10 +97,7 @@ component extends="tests.specs.CBMongoDBBaseTest" {
 				VARIABLES.testDocumentID = document_id;
 
 				writeDump( testDocumentId );
-				writeDump( model
-					.reset()
-					.load( document_id, false )
-				);
+				writeDump( model.reset().load( document_id, false ) );
 				abort;
 				// test entity load
 				expect(
