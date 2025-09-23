@@ -45,7 +45,7 @@ component name="GridFS" accessors="true" {
 		if ( len( arguments.db ) > 1 ) {
 			setDBInstance( arguments.db );
 
-			setDBInstance( mongoClient.getMongo().getDb( variables.dbInstance ) );
+			setDBInstance( mongoClient.getMongo().getDatabase( variables.dbInstance ) );
 
 			setGridInstance(
 				jLoader.create( "com.mongodb.gridfs.GridFS" ).init( variables.dbInstance, variables.bucketName )
