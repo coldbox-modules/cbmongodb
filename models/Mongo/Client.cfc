@@ -90,10 +90,11 @@ component accessors="true" {
 				MongoConfigSettings.connectionString
 			)
 		) {
-			// Use connection string directly with MongoClients.create()
+			// Use connection string directly with MongoClients.create() - preferred for MongoDB 5.x
 			mongoClient = variables.MongoClients.create( MongoConfigSettings.connectionString );
 		} else {
-			// Build client settings using the modern MongoClientSettings
+			// Fallback: Build client settings using the modern MongoClientSettings
+			// Note: This may have limited configuration options in 5.x
 			var clientSettings = getMongoConfig().getMongoClientSettings();
 			mongoClient = variables.MongoClients.create( clientSettings );
 		}
