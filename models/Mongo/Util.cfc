@@ -9,7 +9,7 @@
  * @author    Jon Clausen <jon_clausen@silowebworks.com>
  * @license   Apache v2.0 <http: // www.apache.org / licenses/>
  */
-component name="MongoUtil" accessors="true" {
+component accessors="true" {
 
 	property name="MongoConfig" inject="id:MongoConfig@cbmongodb";
 	// property name="NullSupport" default="false";
@@ -43,13 +43,15 @@ component name="MongoUtil" accessors="true" {
 	}
 
 	function toMongoDocument( data ){
-		var doc = jLoader.create( "org.bson.Document" );
-		doc.putAll( data );
+		var doc = jLoader.create( "org.bson.Document" ).init();
+
+		data.keyArray().each(
+			( key, value ) => doc.put( key, value )
+		);
 
 		if ( !structIsEmpty( data ) ) {
 			ensureTyping( doc );
 		}
-
 		return doc;
 	}
 
@@ -97,7 +99,7 @@ component name="MongoUtil" accessors="true" {
 	/**
 	 * Convenience for turning a string _id into a Mongo ObjectId object
 	 */
-	function newObjectIDFromID( String id ){
+	function newObjectIDFromID( id ){
 		if ( !isSimpleValue( id ) || !isObjectId( id ) ) return id;
 
 		return jLoader.create( "org.bson.types.ObjectId" ).init( id );
@@ -106,13 +108,13 @@ component name="MongoUtil" accessors="true" {
 	/**
 	 * Convenience for creating a new criteria object based on a string _id
 	 */
-	function newIDCriteriaObject( String id ){
+	function newIDCriteriaObject( id ){
 		var dbo = newDBObject();
 		dbo.put( "_id", newObjectIDFromID( arguments.id ) );
 		return dbo;
 	}
 
-	function isObjectId( string id ){
+	function isObjectId( id ){
 		return jLoader.create( "org.bson.types.ObjectId" ).isValid( arguments.id );
 	}
 
@@ -148,18 +150,23 @@ component name="MongoUtil" accessors="true" {
 	 * Create a new instance of the CFBasicDBObject. You use these anywhere the Mongo Java driver takes a DBObject
 	 */
 	function newDBObject(){
-		return jLoader.create( "com.mongodb.BasicDBObject" );
+		return jLoader.create( "com.mongodb.BasicDBObject" ).init();
 	}
 
 	function dbObjectNew( contents ){
 		var dbo = newDBObject();
 
+		// toMongoDocument( arguments.contents ).entrySet().forEach( ( item ) => dbo.put( item.getKey(), item.getValue() ) );
+		// this currently fails on boxlang
+
+		// This dumps String: Document{{}}
+
+		// this errors
 		dbo.putAll( toMongoDocument( arguments.contents ) );
 
 		if ( !isStruct( dbo ) && listLen( structKeyList( dbo ) ) > 0 ) {
 			ensureTyping( dbo );
 		}
-
 		return dbo;
 	}
 
@@ -173,9 +180,8 @@ component name="MongoUtil" accessors="true" {
 				} else if ( !isNumeric( dbo[ i ] ) && len( dbo[ i ] ) != 0 && isBoolean( dbo[ i ] ) ) {
 					dbo.put( i, javacast( "boolean", dbo[ i ] ) );
 				} else if ( isDate( dbo[ i ] ) ) {
-					dbo.put( i, parseDateTime( dbo[ i ] ) );
-					var castDate = jLoader.create( "java.util.Date" ).init( dbo[ i ].getTime() );
-					dbo.put( i, castDate );
+					var dateObj = parseDateTime( dbo[ i ] );
+					dbo.put( i, server.keyExists( "boxlang" ) ? dateObj.toDate() : dateObj );
 				} else if ( NullSupport && isSimpleValue( dbo[ i ] ) && len( dbo[ i ] ) == 0 ) {
 					dbo.put( i, javacast( "null", 0 ) );
 				} else if ( i == "_id" && isObjectIdString( dbo[ i ] ) ) {

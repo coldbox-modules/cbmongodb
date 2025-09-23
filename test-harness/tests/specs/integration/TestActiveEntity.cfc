@@ -1,11 +1,19 @@
 /*******************************************************************************
  *	Integration Test for /cfmongodb/models/ActiveEntity.cfc
  *******************************************************************************/
-component name="TestModelActiveEntity" extends="tests.specs.CBMongoDBBaseTest" {
+component extends="tests.specs.CBMongoDBBaseTest" {
 
 	function beforeAll(){
 		// custom methods
 		super.beforeAll();
+		expect( variables.people ).toBeComponent();
+		expect( variables.people.get_default_document() ).toBeStruct();
+		expect( variables.people.getTestDocument() ).toBeStruct();
+
+		// var scope our references for the remaining tests
+		VARIABLES.model   = variables.people;
+		VARIABLES.person  = variables.people.getTestDocument();
+		VARIABLES.person2 = variables.people.getTestDocument2();
 	}
 
 	function afterAll(){
@@ -14,21 +22,6 @@ component name="TestModelActiveEntity" extends="tests.specs.CBMongoDBBaseTest" {
 	}
 
 	function run( testResults, testBox ){
-		describe( "MongoDB Active Entity", function(){
-			beforeEach( function( currentSpec ){
-			} );
-
-			it( "Tests Mock Availability", function(){
-				expect( variables.people ).toBeComponent();
-				expect( variables.people.get_default_document() ).toBeStruct();
-				expect( variables.people.getTestDocument() ).toBeStruct();
-
-				// var scope our references for the remaining tests
-				VARIABLES.model   = variables.people;
-				VARIABLES.person  = variables.people.getTestDocument();
-				VARIABLES.person2 = variables.people.getTestDocument2();
-			} );
-		} );
 
 		describe( "Tests modifications to entity scopes", function(){
 			it( "Tests custom accessor availability and accuracy", function(){
@@ -103,6 +96,13 @@ component name="TestModelActiveEntity" extends="tests.specs.CBMongoDBBaseTest" {
 				var document_id = model.create();
 				expect( document_id ).toBeString();
 				VARIABLES.testDocumentID = document_id;
+
+				writeDump( testDocumentId );
+				writeDump( model
+					.reset()
+					.load( document_id, false )
+				);
+				abort;
 				// test entity load
 				expect(
 					model

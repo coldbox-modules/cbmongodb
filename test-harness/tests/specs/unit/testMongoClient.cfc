@@ -1,7 +1,7 @@
 /*******************************************************************************
  *	Unit Tests for cbmongodb.models.Mongo.MongoClient
  *******************************************************************************/
-component name="TestMongoUtil" extends="tests.specs.CBMongoDBBaseTest" {
+component extends="tests.specs.CBMongoDBBaseTest" {
 
 	function run( testResults, testBox ){
 		describe( "Test Client Immutability", function(){

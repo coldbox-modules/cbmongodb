@@ -1,7 +1,7 @@
 /*******************************************************************************
  *	Integration Test for /cfmongodb/models/FileEntity.cfc
  *******************************************************************************/
-component name="TestModelFileEntity" extends="tests.specs.CBMongoDBBaseTest" {
+component extends="tests.specs.CBMongoDBBaseTest" {
 
 	function beforeAll(){
 		// custom methods
