@@ -51,8 +51,8 @@ component accessors="true" {
 	public function onDIComplete(){
 		// this.setMongoConfig(getMongoConfig());
 
-		// The Mongo driver client (using modern MongoClients factory)
-		variables.MongoClients = jLoader.create( "com.mongodb.client.MongoClients" );
+		// The MongoClients factory class for creating clients
+		variables.MongoClientsClass = jLoader.create( "com.mongodb.client.MongoClients" );
 
 		// @TODO: The async client
 		// variables.MongoAsync = jLoader.create('com.mongodb.async.client.MongoClient');
@@ -91,12 +91,12 @@ component accessors="true" {
 			)
 		) {
 			// Use connection string directly with MongoClients.create() - preferred for MongoDB 5.x
-			mongoClient = variables.MongoClients.create( MongoConfigSettings.connectionString );
+			mongoClient = variables.MongoClientsClass.create( MongoConfigSettings.connectionString );
 		} else {
 			// Fallback: Build client settings using the modern MongoClientSettings
 			// Note: This may have limited configuration options in 5.x
 			var clientSettings = getMongoConfig().getMongoClientSettings();
-			mongoClient = variables.MongoClients.create( clientSettings );
+			mongoClient = variables.MongoClientsClass.create( clientSettings );
 		}
 
 		// Store the client for reuse

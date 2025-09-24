@@ -73,7 +73,7 @@ component
 		buildMongoClientSettings( mongoClientOptions );
 
 		// For MongoDB 5.x, if no connection string is provided but we have servers, build one
-		if ( !len( variables.conf.connectionString ) && arrayLen( variables.conf.servers ) ) {
+		if ( !len( variables.conf.connectionString ) && structKeyExists( variables.conf, "servers" ) && arrayLen( variables.conf.servers ) ) {
 			buildConnectionString();
 		}
 
@@ -103,11 +103,13 @@ component
 	}
 
 	function buildMongoClientSettings( struct mongoClientOptions ){
-		var builder = jLoader.create( "com.mongodb.MongoClientSettings" ).builder();
+		var MongoClientSettingsClass = jLoader.create( "com.mongodb.MongoClientSettings" );
+		var builder = MongoClientSettingsClass.builder();
 
 		// Add authentication if provided
 		if ( structKeyExists( variables.conf, "auth" ) && len( variables.conf.auth.username ) && len( variables.conf.auth.password ) ) {
-			var credential = jLoader.create( "com.mongodb.MongoCredential" ).createCredential(
+			var MongoCredentialClass = jLoader.create( "com.mongodb.MongoCredential" );
+			var credential = MongoCredentialClass.createCredential(
 				javacast( "string", variables.conf.auth.username ),
 				javacast( "string", structKeyExists( variables.conf.auth, "db" ) ? variables.conf.auth.db : "admin" ),
 				variables.conf.auth.password.toCharArray()
@@ -165,9 +167,9 @@ component
 			// These will be handled via connection string approach in MongoDB 5.x
 		}
 
-		variables.conf.MongoClientSettings = builder.build();
+		variables.conf.mongoClientSettings = builder.build();
 
-		return variables.conf.MongoClientSettings;
+		return variables.conf.mongoClientSettings;
 	}
 
 	private function buildConnectionString(){
