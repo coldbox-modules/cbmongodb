@@ -30,7 +30,7 @@ component accessors="true" {
 			return obj;
 		}
 		if ( isArray( arguments.obj ) ) {
-			var list = jLoader.create( "java.util.ArrayList" );
+			var list = jLoader.create( "java.util.ArrayList" ).init();
 
 			for ( var member in arguments.obj ) {
 				list.add( toMongo( member ) );
@@ -104,7 +104,17 @@ component accessors="true" {
 	}
 
 	/**
+	 * Convenience for creating a new criteria object based on a string _id using modern Document
+	 */
+	function newIDCriteriaDocument( String id ){
+		var doc = newDocument();
+		doc.put( "_id", newObjectIDFromID( arguments.id ) );
+		return doc;
+	}
+
+	/**
 	 * Convenience for creating a new criteria object based on a string _id
+	 * @deprecated Use newIDCriteriaDocument() instead for new code
 	 */
 	function newIDCriteriaObject( id ){
 		var dbo = newDBObject();
@@ -145,7 +155,15 @@ component accessors="true" {
 
 
 	/**
+	 * Create a new instance of the Document. This is the modern way to create MongoDB documents.
+	 */
+	function newDocument(){
+		return jLoader.create( "org.bson.Document" ).init();
+	}
+
+	/**
 	 * Create a new instance of the CFBasicDBObject. You use these anywhere the Mongo Java driver takes a DBObject
+	 * @deprecated Use newDocument() instead for new code
 	 */
 	function newDBObject(){
 		return jLoader.create( "com.mongodb.BasicDBObject" ).init();
@@ -235,14 +253,14 @@ component accessors="true" {
 	 * Returns the results of a dbResult object as an array of documents
 	 */
 	function asArray( dbResult ){
-		return toCF( dbResult.into( createObject( "java", "java.util.ArrayList" ).init() ) );
+		return toCF( dbResult.into( jLoader.create( "java.util.ArrayList" ).init() ) );
 	}
 
 	/**
 	 * Indexing Utilities
 	 */
 	function createIndexOptions( options ){
-		var idxOptions = jLoader.create( "com.mongodb.client.model.IndexOptions" );
+		var idxOptions = jLoader.create( "com.mongodb.client.model.IndexOptions" ).init();
 
 		if ( structKeyExists( options, "name" ) ) idxOptions.name( options.name );
 		if ( structKeyExists( options, "sparse" ) ) idxOptions.sparse( options.sparse );
