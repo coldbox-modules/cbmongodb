@@ -253,7 +253,7 @@ component accessors="true" {
 	 * Returns the results of a dbResult object as an array of documents
 	 */
 	function asArray( dbResult ){
-		return toCF( dbResult.into( createObject( "java", "java.util.ArrayList" ).init() ) );
+		return toCF( dbResult.into( jLoader.create( "java.util.ArrayList" ).init() ) );
 	}
 
 	/**
