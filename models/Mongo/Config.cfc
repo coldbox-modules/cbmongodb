@@ -103,12 +103,13 @@ component
 	}
 
 	function buildMongoClientSettings( struct mongoClientOptions ){
-		var MongoClientSettingsClass = jLoader.create( "com.mongodb.MongoClientSettings" );
+		// Use static method access for MongoDB 5.x
+		var MongoClientSettingsClass = createObject( "java", "com.mongodb.MongoClientSettings" );
 		var builder = MongoClientSettingsClass.builder();
 
 		// Add authentication if provided
 		if ( structKeyExists( variables.conf, "auth" ) && len( variables.conf.auth.username ) && len( variables.conf.auth.password ) ) {
-			var MongoCredentialClass = jLoader.create( "com.mongodb.MongoCredential" );
+			var MongoCredentialClass = createObject( "java", "com.mongodb.MongoCredential" );
 			var credential = MongoCredentialClass.createCredential(
 				javacast( "string", variables.conf.auth.username ),
 				javacast( "string", structKeyExists( variables.conf.auth, "db" ) ? variables.conf.auth.db : "admin" ),

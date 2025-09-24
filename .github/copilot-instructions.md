@@ -5,14 +5,15 @@ Always reference these instructions first and fallback to search or bash command
 
 ## CRITICAL TESTING REQUIREMENTS
 
-**🚨 ALL TESTS MUST PASS BEFORE ANY COMMIT 🚨**
+**🚨 ALL TESTS MUST PASS ON ALL CFML ENGINES BEFORE ANY COMMIT 🚨**
 
 Before making ANY commit or change:
 1. **MANDATORY**: Run code formatting: `box run-script format`
-2. **MANDATORY**: Run complete test suite and ensure 100% pass rate
-3. **MANDATORY**: Verify all CFML engines pass tests (Lucee 5+, Adobe 2023+, BoxLang)
-4. **MANDATORY**: Test with MongoDB 7.0+ connectivity
-5. **NO EXCEPTIONS**: Do not commit code that breaks existing functionality
+2. **MANDATORY**: Run complete test suite and ensure 100% pass rate on ALL engines
+3. **MANDATORY**: Verify ALL CFML engines pass tests (Lucee 5+, Adobe 2023+, Adobe 2025+, BoxLang)
+4. **MANDATORY**: Test with MongoDB 8.0+ connectivity (matches CI environment)
+5. **MANDATORY**: Ensure CI matrix passes for all engines before any commit
+6. **NO EXCEPTIONS**: Do not commit code that breaks existing functionality on ANY engine
 
 ### Code Formatting Requirements
 ```bash

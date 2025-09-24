@@ -51,12 +51,6 @@ component accessors="true" {
 	public function onDIComplete(){
 		// this.setMongoConfig(getMongoConfig());
 
-		// The MongoClients factory class for creating clients
-		variables.MongoClientsClass = jLoader.create( "com.mongodb.client.MongoClients" );
-
-		// @TODO: The async client
-		// variables.MongoAsync = jLoader.create('com.mongodb.async.client.MongoClient');
-
 		// WriteConcern Config
 		variables.WriteConcern = jLoader.create( "com.mongodb.WriteConcern" );
 
@@ -82,7 +76,7 @@ component accessors="true" {
 		if ( structKeyExists( variables.databases, arguments.dbName ) )
 			return variables.databases[ arguments.dbName ];
 
-		// Create MongoDB client using modern API
+		// Create MongoDB client using modern API with proper static method access
 		var mongoClient = "";
 
 		if (
@@ -91,12 +85,14 @@ component accessors="true" {
 			)
 		) {
 			// Use connection string directly with MongoClients.create() - preferred for MongoDB 5.x
-			mongoClient = variables.MongoClientsClass.create( MongoConfigSettings.connectionString );
+			var MongoClientsClass = createObject( "java", "com.mongodb.client.MongoClients" );
+			mongoClient = MongoClientsClass.create( MongoConfigSettings.connectionString );
 		} else {
 			// Fallback: Build client settings using the modern MongoClientSettings
 			// Note: This may have limited configuration options in 5.x
 			var clientSettings = getMongoConfig().getMongoClientSettings();
-			mongoClient = variables.MongoClientsClass.create( clientSettings );
+			var MongoClientsClass = createObject( "java", "com.mongodb.client.MongoClients" );
+			mongoClient = MongoClientsClass.create( clientSettings );
 		}
 
 		// Store the client for reuse
