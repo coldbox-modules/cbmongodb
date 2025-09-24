@@ -86,6 +86,12 @@ component
 	public function addServer( serverName, serverPort ){
 		var sa = jLoader.create( "com.mongodb.ServerAddress" ).init( serverName, javacast( "integer", serverPort ) );
 		variables.conf.servers.add( sa );
+		
+		// Also store server info for connection string building
+		if ( !structKeyExists( variables.conf, "serverInfo" ) ) {
+			variables.conf.serverInfo = [];
+		}
+		arrayAppend( variables.conf.serverInfo, { host: serverName, port: serverPort } );
 
 		return this;
 	}
@@ -172,10 +178,12 @@ component
 			connStr = connStr & variables.conf.auth.username & ":" & variables.conf.auth.password & "@";
 		}
 		
-		// Add servers
+		// Add servers using stored server info to avoid ServerAddress method issues
 		var serverList = [];
-		for ( var server in variables.conf.servers ) {
-			arrayAppend( serverList, server.getHost() & ":" & server.getPort() );
+		if ( structKeyExists( variables.conf, "serverInfo" ) ) {
+			for ( var serverInfo in variables.conf.serverInfo ) {
+				arrayAppend( serverList, serverInfo.host & ":" & serverInfo.port );
+			}
 		}
 		connStr = connStr & arrayToList( serverList, "," );
 		
@@ -239,7 +247,7 @@ component
 	}
 
 	public string function getDBName(){
-		return getDefaults().dbName;
+		return getDefaults().dbname;
 	}
 
 	public Array function getServers(){

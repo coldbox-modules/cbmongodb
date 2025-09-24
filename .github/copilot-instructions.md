@@ -3,6 +3,24 @@ cbmongodb is a ColdBox module that provides MongoDB integration for ColdFusion (
 
 Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.
 
+## CRITICAL TESTING REQUIREMENTS
+
+**🚨 ALL TESTS MUST PASS BEFORE ANY COMMIT 🚨**
+
+Before making ANY commit or change:
+1. **MANDATORY**: Run complete test suite and ensure 100% pass rate
+2. **MANDATORY**: Verify all CFML engines pass tests (Lucee 5+, Adobe 2023+, BoxLang)
+3. **MANDATORY**: Test with MongoDB 7.0+ connectivity
+4. **NO EXCEPTIONS**: Do not commit code that breaks existing functionality
+
+### Test Execution Requirements
+```bash
+# REQUIRED before any commit - all must pass
+box testbox run --verbose outputFile=test-harness/tests/results/test-results outputFormats=json,antjunit
+```
+
+**Test failure = STOP. Fix issues before proceeding.**
+
 ## Working Effectively
 
 ### Prerequisites
@@ -118,11 +136,13 @@ box run-script format:watch    # Watch and auto-format
 ## Validation Requirements
 
 **CRITICAL: After making changes, ALWAYS run with adequate timeouts:**
-1. **Code Formatting**: `box run-script format` (3+ minute timeout)
-2. **Verify MongoDB Connection**: `curl -s http://localhost:27017` (should show MongoDB message)
-3. **Build Validation**: `box run-script build:module` (45+ minute timeout, NEVER CANCEL)
-4. **Complete Test Suite**: `box testbox run --verbose` (20+ minute timeout, NEVER CANCEL)
+1. **MANDATORY: Complete Test Suite**: `box testbox run --verbose` (20+ minute timeout, NEVER CANCEL)
+2. **Code Formatting**: `box run-script format` (3+ minute timeout)
+3. **Verify MongoDB Connection**: `curl -s http://localhost:27017` (should show MongoDB message)
+4. **Build Validation**: `box run-script build:module` (45+ minute timeout, NEVER CANCEL)
 5. **Server Start Test**: `box server start serverConfigFile=server-lucee@5.json` (5+ minute timeout)
+
+**🔥 CRITICAL RULE: NO COMMITS WITHOUT 100% PASSING TESTS 🔥**
 
 **Manual Testing Scenarios (After Server Start)**:
 - Navigate to http://localhost:60299 (should load ColdBox app)

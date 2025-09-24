@@ -241,7 +241,7 @@ component accessors="true" {
 	 * Get the underlying Java driver's MongoDatabase object
 	 */
 	function getMongoDB( mongoConfig = "" ){
-		return variables.mongoClient.getDatabase( getMongoConfig().getDefaults().dbName );
+		return variables.mongoClient.getDatabase( getMongoConfig().getDefaults().dbname );
 	}
 
 }
