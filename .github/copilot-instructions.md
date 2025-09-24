@@ -8,10 +8,17 @@ Always reference these instructions first and fallback to search or bash command
 **🚨 ALL TESTS MUST PASS BEFORE ANY COMMIT 🚨**
 
 Before making ANY commit or change:
-1. **MANDATORY**: Run complete test suite and ensure 100% pass rate
-2. **MANDATORY**: Verify all CFML engines pass tests (Lucee 5+, Adobe 2023+, BoxLang)
-3. **MANDATORY**: Test with MongoDB 7.0+ connectivity
-4. **NO EXCEPTIONS**: Do not commit code that breaks existing functionality
+1. **MANDATORY**: Run code formatting: `box run-script format`
+2. **MANDATORY**: Run complete test suite and ensure 100% pass rate
+3. **MANDATORY**: Verify all CFML engines pass tests (Lucee 5+, Adobe 2023+, BoxLang)
+4. **MANDATORY**: Test with MongoDB 7.0+ connectivity
+5. **NO EXCEPTIONS**: Do not commit code that breaks existing functionality
+
+### Code Formatting Requirements
+```bash
+# REQUIRED before any commit - format all code
+box run-script format
+```
 
 ### Test Execution Requirements
 ```bash
@@ -19,7 +26,7 @@ Before making ANY commit or change:
 box testbox run --verbose outputFile=test-harness/tests/results/test-results outputFormats=json,antjunit
 ```
 
-**Test failure = STOP. Fix issues before proceeding.**
+**Formatting or Test failure = STOP. Fix issues before proceeding.**
 
 ## Working Effectively
 
@@ -136,13 +143,13 @@ box run-script format:watch    # Watch and auto-format
 ## Validation Requirements
 
 **CRITICAL: After making changes, ALWAYS run with adequate timeouts:**
-1. **MANDATORY: Complete Test Suite**: `box testbox run --verbose` (20+ minute timeout, NEVER CANCEL)
-2. **Code Formatting**: `box run-script format` (3+ minute timeout)
+1. **MANDATORY: Code Formatting FIRST**: `box run-script format` (3+ minute timeout, NEVER CANCEL)
+2. **MANDATORY: Complete Test Suite**: `box testbox run --verbose` (20+ minute timeout, NEVER CANCEL)
 3. **Verify MongoDB Connection**: `curl -s http://localhost:27017` (should show MongoDB message)
 4. **Build Validation**: `box run-script build:module` (45+ minute timeout, NEVER CANCEL)
 5. **Server Start Test**: `box server start serverConfigFile=server-lucee@5.json` (5+ minute timeout)
 
-**🔥 CRITICAL RULE: NO COMMITS WITHOUT 100% PASSING TESTS 🔥**
+**🔥 CRITICAL RULE: NO COMMITS WITHOUT FORMATTING AND 100% PASSING TESTS 🔥**
 
 **Manual Testing Scenarios (After Server Start)**:
 - Navigate to http://localhost:60299 (should load ColdBox app)
@@ -161,7 +168,7 @@ box run-script format:watch    # Watch and auto-format
 
 ## Dependencies and Libraries
 - **cbjavaloader**: Java library loading module
-- **MongoDB Java Driver 4.9.1**: Core database connectivity
+- **MongoDB Java Driver 5.5.1**: Core database connectivity (updated from 4.9.1)
 - **BSON library**: Document serialization
 - **JavaXT Core 1.7.8**: Utility functions
 
@@ -193,6 +200,18 @@ box run-script format:watch    # Watch and auto-format
 - **Problem**: Temp directory not found for image processing
 - **Solution**: Create `/cbmongodb/tmp/` directory or configure custom tmpDirectory in settings
 - **Default**: MaxWidth: 1000px, MaxHeight: 1000px for images
+
+**CI Test Failures**:
+- **Problem**: GitHub Actions tests failing
+- **Solution**: Check dependency versions match in box.json (MongoDB 5.5.1 drivers)
+- **Solution**: Ensure all code is properly formatted with `box run-script format`
+- **Solution**: Verify MongoDB connection strings are properly generated
+- **Solution**: Check for Java object instantiation issues (missing `.init()` calls)
+- **Debugging**: Review GitHub Actions logs for specific error messages
+- **Common Issues**: 
+  - Constructor errors: Use static builder methods, not direct constructors
+  - API compatibility: MongoDB 5.x removed some methods, use connection strings instead
+  - Variable naming: Ensure consistent use of `dbname` vs `dbName`
 
 ## CI/CD Integration
 - GitHub Actions: `.github/workflows/tests.yml`
@@ -246,10 +265,10 @@ test-harness/          # ColdBox test application
 ```json
 "dependencies":{
     "cbjavaloader":"stable",
-    "mongodb-legacy-driver":"jar:https://search.maven.org/remotecontent?filepath=org/mongodb/mongodb-driver-legacy/4.9.1/mongodb-driver-legacy-4.9.1.jar",
-    "mongodb-bson":"jar:https://search.maven.org/remotecontent?filepath=org/mongodb/bson/4.9.1/bson-4.9.1.jar",
-    "mongodb-driver-core":"jar:https://search.maven.org/remotecontent?filepath=org/mongodb/mongodb-driver-core/4.9.1/mongodb-driver-core-4.9.1.jar",
-    "mongodb-driver-sync":"jar:https://search.maven.org/remotecontent?filepath=org/mongodb/mongodb-driver-sync/4.9.1/mongodb-driver-sync-4.9.1.jar",
+    "mongodb-legacy-driver":"jar:https://search.maven.org/remotecontent?filepath=org/mongodb/mongodb-driver-legacy/5.5.1/mongodb-driver-legacy-5.5.1.jar",
+    "mongodb-bson":"jar:https://search.maven.org/remotecontent?filepath=org/mongodb/bson/5.5.1/bson-5.5.1.jar",
+    "mongodb-driver-core":"jar:https://search.maven.org/remotecontent?filepath=org/mongodb/mongodb-driver-core/5.5.1/mongodb-driver-core-5.5.1.jar",
+    "mongodb-driver-sync":"jar:https://search.maven.org/remotecontent?filepath=org/mongodb/mongodb-driver-sync/5.5.1/mongodb-driver-sync-5.5.1.jar",
     "javaxt-core":"jar:https://www.javaxt.com/maven/javaxt/javaxt-core/1.7.8/javaxt-core-1.7.8.jar"
 }
 ```
