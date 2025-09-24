@@ -39,16 +39,17 @@ component accessors="true" {
 	 * @param string bucket 	The name of the bucket to use
 	 **/
 	function init( string db = "", string bucket = "fs" ){
-		// Our implementation depends on the older DB construction
 		setBucketName( arguments.bucket );
 
 		if ( len( arguments.db ) > 1 ) {
 			setDBInstance( arguments.db );
 
-			setDBInstance( mongoClient.getMongo().getDatabase( variables.dbInstance ) );
-
+			// MongoDB 5.x uses GridFSBucket instead of GridFS
+			var mongoDatabase = mongoClient.getMongo().getDatabase( variables.dbInstance );
+			var gridFSBuckets = jLoader.create( "com.mongodb.client.gridfs.GridFSBuckets" );
+			
 			setGridInstance(
-				jLoader.create( "com.mongodb.gridfs.GridFS" ).init( variables.dbInstance, variables.bucketName )
+				gridFSBuckets.create( mongoDatabase, variables.bucketName )
 			);
 		}
 
@@ -147,18 +148,18 @@ component accessors="true" {
 		}
 
 
-		var created = GridInstance.createFile( inputStream, arguments.fileName );
+		// MongoDB 5.x GridFSBucket API
+		var gridFSUploadOptions = jLoader.create( "com.mongodb.client.gridfs.model.GridFSUploadOptions" );
+		gridFSUploadOptions.metadata( mongoUtil.toMongo( fileData ) );
 
-		created.put( "fileInfo", mongoUtil.toMongo( fileData ) );
-
-		created.save();
+		var objectId = GridInstance.uploadFromStream( arguments.fileName, inputStream, gridFSUploadOptions );
 
 		// clean up our files before returning
 		if ( isDefined( "tmpPath" ) && fileExists( tmpPath ) ) fileDelete( tmpPath );
 
 		if ( arguments.deleteFile ) fileDelete( arguments.filePath );
 
-		return created.getId().toString();
+		return objectId.toString();
 	}
 
 	/**
@@ -171,7 +172,13 @@ component accessors="true" {
 			arguments.id = mongoUtil.newObjectIdFromId( arguments.id );
 		}
 
-		return GridInstance.findOne( arguments.id );
+		// MongoDB 5.x GridFSBucket API
+		try {
+			return GridInstance.openDownloadStream( arguments.id );
+		} catch ( any e ) {
+			// Return null if file not found
+			return javacast( "null", "" );
+		}
 	}
 
 	/**
@@ -182,6 +189,7 @@ component accessors="true" {
 	function find( required struct criteria ){
 		if ( isNull( GridInstance ) ) throw( "GridFS not initialized." );
 
+		// MongoDB 5.x GridFSBucket API
 		return GridInstance.find( mongoUtil.toMongo( arguments.criteria ) );
 	}
 
@@ -195,7 +203,9 @@ component accessors="true" {
 		if ( structKeyExists( arguments.criteria, "_id" ) )
 			arguments.criteria[ "_id" ] = mongoUtil.newObjectIdFromId( arguments.criteria[ "_id" ] );
 
-		return GridInstance.findOne( mongoUtil.toMongo( arguments.criteria ) );
+		// MongoDB 5.x GridFSBucket API - find returns cursor, so get first result
+		var cursor = GridInstance.find( mongoUtil.toMongo( arguments.criteria ) );
+		return cursor.first();
 	}
 
 	/**
@@ -206,7 +216,8 @@ component accessors="true" {
 	function getFileList( required struct criteria = {} ){
 		if ( isNull( GridInstance ) ) throw( "GridFS not initialized." );
 
-		return GridInstance.getFileList( mongoUtil.toMongo( arguments.criteria ) );
+		// MongoDB 5.x GridFSBucket API
+		return GridInstance.find( mongoUtil.toMongo( arguments.criteria ) );
 	}
 
 	/**
@@ -215,8 +226,13 @@ component accessors="true" {
 	 * @param any id 	The Mongo ObjectID or _id string representation
 	 **/
 	function removeById( required any id ){
-		var criteria = mongoUtil.newIdCriteriaObject( arguments.id );
-		return GridInstance.remove( mongoUtil.toMongo( criteria ) );
+		if ( isSimpleValue( arguments.id ) ) {
+			arguments.id = mongoUtil.newObjectIdFromId( arguments.id );
+		}
+		
+		// MongoDB 5.x GridFSBucket API
+		GridInstance.delete( arguments.id );
+		return true;
 	}
 
 	/**
@@ -225,7 +241,54 @@ component accessors="true" {
 	 * @param struct criteria 	The CFML struct representation of the Mongo criteria query
 	 **/
 	function remove( required struct criteria ){
-		return GridInstance.remove( mongoUtil.toMongo( arguments.criteria ) );
+		// MongoDB 5.x approach: find files first, then delete by ID
+		var files = GridInstance.find( mongoUtil.toMongo( arguments.criteria ) );
+		var deletedCount = 0;
+		
+		while ( files.hasNext() ) {
+			var file = files.next();
+			GridInstance.delete( file.getId() );
+			deletedCount++;
+		}
+		
+		return deletedCount;
+	}
+
+	/**
+	 * Downloads a GridFS file to a specified path
+	 *
+	 * @param any id 			The Mongo ObjectID or _id string representation
+	 * @param string filePath 	The path where the file should be saved
+	 **/
+	function downloadToPath( required any id, required string filePath ){
+		if ( isSimpleValue( arguments.id ) ) {
+			arguments.id = mongoUtil.newObjectIdFromId( arguments.id );
+		}
+
+		// MongoDB 5.x GridFSBucket API
+		var outputStream = jLoader.create( "java.io.FileOutputStream" ).init( arguments.filePath );
+		try {
+			GridInstance.downloadToStream( arguments.id, outputStream );
+			return true;
+		} catch ( any e ) {
+			return false;
+		} finally {
+			outputStream.close();
+		}
+	}
+
+	/**
+	 * Gets a download stream for a GridFS file
+	 *
+	 * @param any id 	The Mongo ObjectID or _id string representation
+	 **/
+	function getDownloadStream( required any id ){
+		if ( isSimpleValue( arguments.id ) ) {
+			arguments.id = mongoUtil.newObjectIdFromId( arguments.id );
+		}
+
+		// MongoDB 5.x GridFSBucket API
+		return GridInstance.openDownloadStream( arguments.id );
 	}
 
 	private function isReadableImage( filePath ){
